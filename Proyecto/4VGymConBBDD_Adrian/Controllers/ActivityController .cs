@@ -1,5 +1,5 @@
-﻿using _4VGymAPI.Models;
-using _4VGymAPI.Repositories;
+﻿using _4VGymEF.Models;
+using _4VGymEF.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace _4VGymAPI.Controllers
@@ -9,10 +9,10 @@ namespace _4VGymAPI.Controllers
     public class ActivityController : ControllerBase
     {
 
-        private readonly InMemoryActivityRepository _repository;
+        private readonly ActivityRepository _repository;
 
         // Inyectamos la clase concreta del repositorio
-        public ActivityController(InMemoryActivityRepository repository)
+        public ActivityController(ActivityRepository repository)
         {
             _repository = repository;
         }
@@ -40,8 +40,7 @@ namespace _4VGymAPI.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                                  new ErrorResponse(1, "An internal server error occurred"));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(1, "An internal server error occurred"));
 
             }
         }

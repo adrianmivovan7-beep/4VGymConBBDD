@@ -31,6 +31,15 @@ namespace _4VGymEF.Models
         [Required(ErrorMessage = "29|La fecha de fin es obligatoria.")]
         [DateGreaterThan(nameof(DateStart), ErrorMessage = "41|La fecha de fin debe ser posterior a la fecha de inicio.")]
         public DateTime DateEnd { get; set; }
+
+        public ActivityCreateDto(int? activityTypeId, List<int> instructorsId, int maxParticipants, DateTime dateStart, DateTime dateEnd)
+        {
+            ActivityTypeId = activityTypeId;
+            InstructorsId = instructorsId;
+            MaxParticipants = maxParticipants;
+            DateStart = dateStart;
+            DateEnd = dateEnd;
+        }
     }
 
 }
