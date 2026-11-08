@@ -1,46 +1,42 @@
-﻿using _4VGymEF.Models;
+﻿using _4VGymEF.Data;
+using _4VGymEF.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace _4VGymEF.Repositories
 {
     public class ActivityRepository
     {
-        private readonly ActivityTypeRepository _repositoryActivityType;
-        private readonly InstructorRepository _repositoryInstructor;
+        private readonly GymDbContext _dbContext;
 
-        public ActivityRepository(ActivityTypeRepository repositoryActivityType, InstructorRepository repositoryInstructor)
+        public ActivityRepository(GymDbContext dbContext)
         {
-            _repositoryActivityType = repositoryActivityType;
-            _repositoryInstructor = repositoryInstructor;
+            _dbContext = dbContext;
         }
 
-
-        public Activity? Add(Activity activity, out List<ErrorResponse> errorResponse)
+        public async Task<List<ErrorResponse>> ValidateNew(ActivityCreateDto activity)
         {
+            var errors = new List<ErrorResponse>();
 
-            errorResponse = new List<ErrorResponse>();
+            bool activityTypeExists = await _dbContext.ActivityTypes
+                .AnyAsync(type => type.Id == activity.ActivityTypeId);
 
-            // Validamos todas los referente a las entidades cruzadas
-            // Validación 1: Que exista el tipo de actividad
-            if (_repositoryActivityType.GetById(activity.ActivityTypeId) == null)
+            if (!activityTypeExists)
             {
-                errorResponse.Add(new ErrorResponse(34, "EL tipo de actividad debe de funcionar"));
-            }
-            // Validacion 2: Que existan todos los monitores
-            errorResponse =
-                activity.InstructorsId
-                        .Where(instructorId => _repositoryInstructor.GetById(instructorId) == null)
-                        .Select(instructorIdNotFound =>
-                        {
-                            return new ErrorResponse(35, "El instructor: " + instructorIdNotFound + " no existe");
-                        })
-                        .ToList();
-            if (errorResponse.Count > 0)
-            {
-                return null;
+                errors.Add(new ErrorResponse(34, "El tipo de actividad indicado no existe."));
             }
 
-            return activity;
+            List<int> existingInstructorIds = await _dbContext.Instructors
+                .Select(instructor => instructor.Id)
+                .ToListAsync();
+
+            List<int> missingIds = activity.Instructors.Select(instructor => instructor.Id)
+                .Except(existingInstructorIds)
+                .ToList();
+
+            errors.AddRange(missingIds.Select(id =>
+                new ErrorResponse(35, $"El instructor con ID {id} no existe.")));
+
+            return errors;
         }
+
     }
-
-}
