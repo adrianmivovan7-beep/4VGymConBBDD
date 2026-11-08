@@ -1,123 +1,94 @@
-﻿using _4VGymEF.Models;
+﻿using _4VGymEF.Data;
+using _4VGymEF.Models;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace _4VGymEF.Repositories
 {
     public class InstructorRepository
     {
-        private Dictionary<long, Instructor> _instructors = new();
-        public InstructorRepository()
-        {
-            SeedData(); // Precargamos algunos datos de prueba
-        }
-        private void SeedData()
-        {
+        private readonly GymDbContext _dbContext;
 
-            _instructors = new Dictionary<long, Instructor>
-            {
-                [1] = new Instructor
+        public InstructorRepository(GymDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public async Task<List<InstructorCreateDto>> GetAll()
+        {
+            return await _dbContext.Instructors
+                .OrderBy(instructor => instructor.Name)
+                .Select(instructor => new InstructorCreateDto
                 {
-                    Id = 1,
-                    Name = "Miguel Goyena",
-                    Email = "miguel_goyena@cuatrovientos.org",
-                    Phone = "654121212",
-                    PhotoUrl = "https://img.magnific.com/vector-premium/imagen-perfil-avatar-hombre-aislada-fondo-imagen-profil-avatar-hombre_1293239-4841.jpg?semt=ais_hybrid&w=740&q=80"
+                    Id = instructor.Id,
+                    Name = instructor.Name,
+                    Email = instructor.Email,
+                    PhotoUrl = instructor.PhotoUrl,
+                    Phone = instructor.Phone
+                })
+                .ToListAsync();
+        }
 
-                },
-                [2] = new Instructor
+        public async Task<InstructorCreateDto?> GetById(int id)
+        {
+            return await _dbContext.Instructors
+                .Where(instructor => instructor.Id == id)
+                .Select(instructor => new InstructorCreateDto
                 {
-                    Id = 2,
-                    Name = "María Martín",
-                    Email = "maria_martin@cuatrovientos.org",
-                    Phone = "663423121",
-                    PhotoUrl = "https://img.magnific.com/vector-premium/avatar-mujer-sonriente_937492-6135.jpg?semt=ais_hybrid&w=740&q=80"
+                    Id = instructor.Id,
+                    Name = instructor.Name,
+                    Email = instructor.Email,
+                    PhotoUrl = instructor.PhotoUrl,
+                    Phone = instructor.Phone
+                })
+                .FirstOrDefaultAsync();
+        }
 
-                },
-                [3] = new Instructor
+        public async Task<List<InstructorCreateDto>> GetByFirstInitial(string firstInitial)
+        {
+            return await _dbContext.Instructors
+                .Where(instructor => instructor.Name.StartsWith(firstInitial))
+                .OrderBy(instructor => instructor.Name)
+                .Select(instructor => new InstructorCreateDto
                 {
-                    Id = 3,
-                    Name = "Iban Sarría",
-                    Email = "iban_sarria@cuatrovientos.org",
-                    Phone = "654646464",
-                    PhotoUrl = "https://img.magnific.com/vector-premium/imagen-perfil-avatar-hombre-aislada-fondo-imagen-profil-avatar-hombre_1293239-4861.jpg?semt=ais_hybrid&w=740&q=80"
-                }
-            };
-
-
+                    Id = instructor.Id,
+                    Name = instructor.Name,
+                    Email = instructor.Email,
+                    PhotoUrl = instructor.PhotoUrl,
+                    Phone = instructor.Phone
+                })
+                .ToListAsync();
         }
 
-        private List<Instructor> ObtenerInstructoresDeBaseDeDatos()
+        public async Task<List<InstructorCreateDto>> GetByIds(List<int> ids)
         {
-            // definir una lista de instructores para simular la obtención de datos desde una base de datos
-            List<Instructor> listaInstructores = new List<Instructor>
-            {
-                new Instructor { Id = 1, Name = "Miguel Goyena", Email = "miguel_goyena@cuatrovientos.org", Phone = "654121212", PhotoUrl = "https://img.magnific.com/vector-premium/imagen-perfil-avatar-hombre-aislada-fondo-imagen-profil-avatar-hombre_1293239-4841.jpg?semt=ais_hybrid&w=740&q=80" },
-                new Instructor { Id = 2, Name = "María Martín", Email = "maria_martin@cuatrovientos.org", Phone = "663423121", PhotoUrl = "https://img.magnific.com/vector-premium/avatar-mujer-sonriente_937492-6135.jpg?semt=ais_hybrid&w=740&q=80" },
-                new Instructor { Id = 3, Name = "Iban Sarría", Email = "iban_sarria@cuatrovientos.org", Phone = "654646464", PhotoUrl = "https://img.magnific.com/vector-premium/imagen-perfil-avatar-hombre-aislada-fondo-imagen-profil-avatar-hombre_1293239-4861.jpg?semt=ais_hybrid&w=740&q=80" }
-            };
-
-            return listaInstructores;
-        }
-        public IEnumerable<Instructor> GetByFirstInitial(string? firstInitial = null)
-        {
-            IEnumerable<Instructor> _allInstructors = _instructors.Values;
-
-            // Si se recibe la inicial, aplicamos el filtro sobre la colección
-            if (!string.IsNullOrWhiteSpace(firstInitial))
-            {
-                IEnumerable<Instructor> filteredInstructors =
-                    _allInstructors
-                        .Where(instructor =>
-                                !string.IsNullOrEmpty(instructor.Name) &&
-                                instructor.Name.StartsWith(firstInitial, StringComparison.OrdinalIgnoreCase)
-                        );
-
-                return filteredInstructors;
-            }
-
-            return _allInstructors;
-        }
-
-        public IEnumerable<Instructor> GetAll()
-        {
-            return _instructors.Values.ToList();
-        }
-        public Instructor? GetById(int id)
-        {
-            _instructors.TryGetValue(id, out Instructor? instructor);
-            return instructor;
-            // return _instructors.Values
-            // .SingleOrDefault(i => i.Id == id); // FistOrDefault mejor que Where
-        }
-        public List<Instructor> GetByIds(List<int> ids)
-        {
-            if (ids == null || !ids.Any())
-                return new List<Instructor>();
-
-            return _instructors.Values
+            return await _dbContext.Instructors
                 .Where(instructor => ids.Contains(instructor.Id))
-                .ToList();
+                .Select(instructor => new InstructorCreateDto
+                {
+                    Id = instructor.Id,
+                    Name = instructor.Name,
+                    Email = instructor.Email,
+                    PhotoUrl = instructor.PhotoUrl,
+                    Phone = instructor.Phone
+                })
+                .ToListAsync();
         }
-        public Instructor? Add(Instructor instructorNew, out ErrorResponse? errorResponse)
+
+        public async Task<ErrorResponse?> ValidateNew(InstructorCreateDto instructor)
         {
-            errorResponse = null;
-            // Comprobación de duplicados (Email o Nombre existente, ignorando mayúsculas/minúsculas)
-            bool exists = _instructors.Any(instructor =>
-                instructor.Value.Email.Equals(instructorNew.Email, StringComparison.CurrentCultureIgnoreCase) ||
-                instructor.Value.Name.Equals(instructorNew.Name, StringComparison.CurrentCultureIgnoreCase));
+            bool emailExists = await _dbContext.Instructors
+                .AnyAsync(ins => ins.Email.ToLower() == instructor.Email.Trim().ToLower());
 
-            if (exists)
+            bool nameExists = await _dbContext.Instructors
+                .AnyAsync(item => item.Name.ToLower() == instructor.Name.Trim().ToLower());
+
+            if (emailExists && nameExists)
             {
-                errorResponse = new ErrorResponse(34, "An instructor with the same email or name already exists");
-                return null;
+                return new ErrorResponse(34, "Ya existe un instructor con ese email y nombre");
             }
-            int nuevoId = _instructors.Max(i => i.Value.Id) + 1;
-            Instructor instructor = new Instructor(nuevoId, instructorNew.Name, instructorNew.Email, instructorNew.PhotoUrl, instructorNew.Phone);
-            _instructors.Add(nuevoId, instructor);
 
-            return instructor;
+            return null;
         }
-
-
     }
 }

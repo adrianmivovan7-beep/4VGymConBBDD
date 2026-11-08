@@ -6,42 +6,63 @@ namespace _4VGymEF.Repositories
 {
     public class ActivityTypeRepository
     {
-        private readonly GymDbContext _gymDbContext;
+        private readonly GymDbContext _dbContext;
 
-        public ActivityTypeRepository(GymDbContext gymDbContext)
+        public ActivityTypeRepository(GymDbContext dbContext)
         {
-            _gymDbContext = gymDbContext;
+            _dbContext = dbContext;
         }
 
-        public async Task<List<ActivityType>> GetAll()
+        public async Task<List<ActivityTypeCreateDto>> GetAll()
         {
-            return await _gymDbContext.ActivityTypes.ToListAsync();
+            return await _dbContext.ActivityTypes
+                .OrderBy(type => type.Name)
+                .Select(type => new ActivityTypeCreateDto
+                {
+                    Id = type.Id,
+                    Name = type.Name,
+                    NumberMonitors = type.NumberMonitors
+                })
+                .ToListAsync();
         }
 
-
-
-        /// <summary>
-        /// Guarda un nuevo tipo de actividad generando su ID de forma automática. (Autonumerico)
-        /// </summary>
-        /// <param name="activityType">Objeto con los datos a guardar (sin ID o con ID no asignado).</param>
-        /// <returns>La entidad guardada con su ID autogenerado.</returns>
-        public ActivityType Add(ActivityType activityType)
+        public async Task<ActivityTypeCreateDto?> GetById(int id)
         {
-            return activityType;
+            return await _dbContext.ActivityTypes
+                .Where(type => type.Id == id)
+                .Select(type => new ActivityTypeCreateDto
+                {
+                    Id = type.Id,
+                    Name = type.Name,
+                    NumberMonitors = type.NumberMonitors
+                })
+                .FirstOrDefaultAsync();
         }
 
-        // Método para obtener todos los tipos de actividades por Nombre
-        public async Task<List<ActivityType>> GetByName(string name)
+        public async Task<List<ActivityTypeCreateDto>> GetByName(string name)
         {
-            return await _gymDbContext.ActivityTypes.Where(act => act.Name.ToLower() == name.ToLower()).ToListAsync();
+            return await _dbContext.ActivityTypes
+                .AsNoTracking()
+                .Where(type => type.Name.ToLower() == name.Trim().ToLower())
+                .Select(type => new ActivityTypeCreateDto
+                {
+                    Id = type.Id,
+                    Name = type.Name,
+                    NumberMonitors = type.NumberMonitors
+                })
+                .ToListAsync();
         }
 
-        public async Task<ActivityType> GetById(int? id)
+        public async Task<ErrorResponse?> ValidateNew(ActivityTypeCreateDto activityType)
         {
-            return _gymDbContext.ActivityTypes.SingleOrDefault(act => act.Id == id);
+            bool exists = await _dbContext.ActivityTypes
+                .AnyAsync(type => type.Name.ToLower() == activityType.Name.Trim().ToLower());
+
+            if (exists)
+            {
+                return new ErrorResponse(5, "Ya existe un tipo de actividad con ese nombre.");
+            }
+
+            return null;
         }
-
-
     }
-
-}
