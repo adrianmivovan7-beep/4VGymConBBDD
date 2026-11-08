@@ -8,42 +8,36 @@ namespace _4VGymAPI.Controllers
     [Route("activities")]
     public class ActivityController : ControllerBase
     {
-
         private readonly ActivityRepository _repository;
 
-        // Inyectamos la clase concreta del repositorio
         public ActivityController(ActivityRepository repository)
         {
             _repository = repository;
         }
 
-        /// <summary>
-        /// POST /activities
-        /// Añade una nueva actividad en 4VGym.
-        /// </summary>
-        /// <param name="activity">ObjetoActivity enviado en el cuerpo de la petición (JSON).</param>
         [HttpPost]
-        [ProducesResponseType(typeof(Activity), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ActivityCreateDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public ActionResult<Activity> CreateActivity([FromBody] Activity activity)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ActivityCreateDto>> Validate(
+            [FromBody] ActivityCreateDto activity)
         {
             try
             {
-                List<ErrorResponse> errors = new List<ErrorResponse>();
-                Activity? activityCreated = _repository.Add(activity, out errors);
-                if (activityCreated == null)
+                List<ErrorResponse> errors =
+                    await _repository.ValidateNew(activity);
+
+                if (errors.Count > 0)
                 {
                     return BadRequest(errors);
                 }
 
-                return StatusCode(StatusCodes.Status201Created, activity);
+                return Ok(activity);
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(1, "An internal server error occurred"));
-
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "Se ha producido un error interno del servidor."));
             }
         }
     }
-
 }

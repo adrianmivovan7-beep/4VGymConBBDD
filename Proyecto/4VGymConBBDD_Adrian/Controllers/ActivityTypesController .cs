@@ -10,82 +10,75 @@ namespace _4VGymAPI.Controllers
     {
         private readonly ActivityTypeRepository _repository;
 
-        // Inyectamos la clase concreta del repositorio
         public ActivityTypesController(ActivityTypeRepository repository)
         {
             _repository = repository;
         }
 
-        /// <summary>
-        /// GET /activity-types
-        /// Devuelve el listado de tipos de actividades de 4VGym.
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<ActivityType>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public ActionResult<IEnumerable<ActivityType>> FindActivityTypes()
+        [HttpGet("Ver todos ActivityType")]
+        [ProducesResponseType(typeof(List<ActivityTypeCreateDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<ActivityTypeCreateDto>>> GetAll()
         {
             try
             {
-                IEnumerable<ActivityType> activityTypes = _repository.GetAll();
-
-                if (activityTypes == null || activityTypes.Count() == 0)
-                {
-                    return BadRequest(new ErrorResponse(2, "No activity types found"));
-                }
-
-                return Ok(activityTypes);
+                return Ok(await _repository.GetAll());
             }
             catch (Exception)
             {
-                return BadRequest(new ErrorResponse(1, "Any problem in the Server"));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "Se ha producido un error interno del servidor."));
             }
         }
 
-        /// <summary>
-        /// POST /activity-types
-        /// Añade un nuevo tipo de actividad en 4VGym.
-        /// </summary>
-        /// <param name="activityType">ObjetoActivityType enviado en el cuerpo de la petición (JSON).</param>
-        [HttpPost]
-        [ProducesResponseType(typeof(ActivityType), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public ActionResult<ActivityType> CreateActivityType([FromBody] ActivityType activityType)
+        [HttpGet("Obtener por Id")]
+        [ProducesResponseType(typeof(ActivityTypeCreateDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ActivityTypeCreateDto>> GetById(int id)
         {
             try
             {
-                // 1. Validación básica de la entrada, objeto no nulo y obligatorio nombre de actividad
-                // Esto se llaman condiciones de barrera!!!
+                ActivityTypeCreateDto? activityType =
+                    await _repository.GetById(id);
+
                 if (activityType == null)
                 {
-                    return BadRequest(new ErrorResponse(3, "Invalid activity type data"));
-                }
-                if (String.IsNullOrEmpty(activityType.Name))
-                {
-                    return BadRequest(new ErrorResponse(4, "The name of the activity is mandatory"));
+                    return NotFound(new ErrorResponse(
+                        2,
+                        $"No existe el tipo de actividad con ID {id}."));
                 }
 
-                // No puede haber tipos de actividad con el mismo nombre
-                if (_repository.GetByName(activityType.Name) != null)
-                {
-                    return BadRequest(new ErrorResponse(5, "The name is unique, there is already another ActivityType with the same Name"));
-                }
-
-
-                // 2. Insertar/Guardar el objeto usando el repositorio
-                ActivityType createdActivityType = _repository.Add(activityType);
-
-                // 3. Retornar respuesta 201 Created con la ubicación o el objeto creado
-                return StatusCode(StatusCodes.Status201Created, createdActivityType);
+                return Ok(activityType);
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                                  new ErrorResponse(1, "An internal server error occurred"));
-
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "Se ha producido un error interno del servidor."));
             }
         }
 
-    }
+        [HttpPost]
+        [ProducesResponseType(typeof(ActivityTypeCreateDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ActivityTypeCreateDto>> Validate(
+            [FromBody] ActivityTypeCreateDto activityType)
+        {
+            try
+            {
+                ErrorResponse? error =
+                    await _repository.ValidateNew(activityType);
 
+                if (error != null)
+                {
+                    return BadRequest(error);
+                }
+
+                return Ok(activityType);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse(StatusCodes.Status500InternalServerError, "Se ha producido un error interno del servidor."));
+            }
+        }
+    }
 }

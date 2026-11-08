@@ -15,16 +15,6 @@ namespace _4VGymEF.Models
         [JsonPropertyName("number-monitors")]
         [Range(1, 20, ErrorMessage = "6|El numero de monitores debe estar entre 1 y 20.")]
         public int NumberMonitors { get; set; } = 1;
-
-        public ActivityTypeCreateDto()
-        {
-        }
-        public ActivityTypeCreateDto(int id, string name, int numberMonitors)
-        {
-            Id = id;
-            Name = name;
-            NumberMonitors = numberMonitors;
-        }
     }
 
 }
