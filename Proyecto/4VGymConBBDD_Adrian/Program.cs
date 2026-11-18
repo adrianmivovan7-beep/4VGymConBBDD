@@ -11,6 +11,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<GymDbContext>(options => options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<ActivityTypeRepository>();
+builder.Services.AddScoped<ActivityRepository>();
+builder.Services.AddScoped<InstructorRepository>();
+
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
