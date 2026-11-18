@@ -1,8 +1,153 @@
 @_4VGymEF_HostAddress = http://localhost:5117
 
-###
+### Obtener todos los instructores
+GET {{_4VGymEF_HostAddress}}/instructors/Obtener todos o filtrar por Nombre o Id
+Accept: application/json
 
-GET {{_4VGymEF_HostAddress}}/instructors
+### Obtener instructor por ID
+GET {{_4VGymEF_HostAddress}}/instructors/Obtener todos o filtrar por Nombre o Id?id=1
+Accept: application/json
+
+### Filtrar instructores por inicial
+GET {{_4VGymEF_HostAddress}}/instructors/Obtener todos o filtrar por Nombre o Id?first_initial=D
+Accept: application/json
+
+### Crear instructor válido
+POST {{_4VGymEF_HostAddress}}/instructors
+Content-Type: application/json
+
+{
+  "name": "David Noya",
+  "phone": "666554433",
+  "email": "david_noya2@gmail.com",
+  "photo_url": "http://www.davidnoya.com/david_noya.jpg"
+}
+
+### Crear instructor con teléfono incorrecto
+POST {{_4VGymEF_HostAddress}}/instructors
+Content-Type: application/json
+
+{
+  "name": "David Noya",
+  "phone": "adsadsa",
+  "email": "david_noya@cuatrovientos.org",
+  "photo_url": "http://www.davidnoya.com/david_noya.jpg"
+}
+
+### Crear instructor con teléfono obligatorio
+POST {{_4VGymEF_HostAddress}}/instructors
+Content-Type: application/json
+
+{
+  "name": "David Noya",
+  "email": "david_noya@cuatrovientos.org",
+  "photo_url": "http://www.davidnoya.com/david_noya.jpg"
+}
+
+### Crear instructor con JSON vacío
+POST {{_4VGymEF_HostAddress}}/instructors
+Content-Type: application/json
+
+{
+}
+
+### Obtener todos los tipos de actividad
+GET {{_4VGymEF_HostAddress}}/activity-types/Ver todos ActivityType
+Accept: application/json
+
+### Obtener tipo de actividad por ID
+GET {{_4VGymEF_HostAddress}}/activity-types/Obtener por Id?id=1
+Accept: application/json
+
+### Crear tipo de actividad válido
+POST {{_4VGymEF_HostAddress}}/activity-types
+Content-Type: application/json
+
+{
+  "name": "Zumba",
+  "number-monitors": 3
+}
+
+### Crear tipo de actividad sin nombre
+POST {{_4VGymEF_HostAddress}}/activity-types
+Content-Type: application/json
+
+{
+  "number-monitors": 3
+}
+
+### Crear tipo de actividad con nombre vacío
+POST {{_4VGymEF_HostAddress}}/activity-types
+Content-Type: application/json
+
+{
+  "name": "",
+  "number-monitors": 3
+}
+
+### Crear tipo de actividad sin número de monitores
+POST {{_4VGymEF_HostAddress}}/activity-types
+Content-Type: application/json
+
+{
+  "name": "Actividad1"
+}
+
+### Crear actividad válida
+POST {{_4VGymEF_HostAddress}}/activities
+Content-Type: application/json
+
+{
+  "activity_type_id": 1,
+  "instructors": [
+    {
+      "id": 1
+    }
+  ],
+  "max_participants": 20,
+  "date_start": "2026-12-22T11:05:48",
+  "date_end": "2026-12-22T12:05:48"
+}
+
+### Crear actividad sin instructores
+POST {{_4VGymEF_HostAddress}}/activities
+Content-Type: application/json
+
+{
+  "activity_type_id": 1,
+  "instructors": [],
+  "max_participants": 20,
+  "date_start": "2026-12-22T11:05:48",
+  "date_end": "2026-12-22T12:05:48"
+}
+
+### Crear actividad con instructores nulos
+POST {{_4VGymEF_HostAddress}}/activities
+Content-Type: application/json
+
+{
+  "activity_type_id": 1,
+  "instructors": null,
+  "max_participants": 20,
+  "date_start": "2026-12-22T11:05:48",
+  "date_end": "2026-12-22T12:05:48"
+}
+
+### Crear actividad con fecha de inicio incorrecta
+POST {{_4VGymEF_HostAddress}}/activities
+Content-Type: application/json
+
+{
+  "activity_type_id": 1,
+  "instructors": [
+    {
+      "id": 1
+    }
+  ],
+  "max_participants": 20,
+  "date_start": "2025-10-21T11:05:48",
+  "date_end": "2024-10-21T12:05:48"
+}
 Accept: application/json
 
 ###

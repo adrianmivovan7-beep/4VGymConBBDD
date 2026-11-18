@@ -22,22 +22,35 @@ namespace _4VGymEF.Repositories
 
             if (!activityTypeExists)
             {
-                errors.Add(new ErrorResponse(34, "El tipo de actividad indicado no existe."));
+                errors.Add(new ErrorResponse(
+                    34,
+                    "El tipo de actividad indicado no existe."));
+            }
+
+            if (activity.Instructors is null)
+            {
+                errors.Add(new ErrorResponse(
+                    26,
+                    "La lista de monitores no puede ser nula."));
+
+                return errors;
             }
 
             List<int> existingInstructorIds = await _dbContext.Instructors
                 .Select(instructor => instructor.Id)
                 .ToListAsync();
 
-            List<int> missingIds = activity.Instructors.Select(instructor => instructor.Id)
+            List<int> missingIds = activity.Instructors
+                .Select(instructor => instructor.Id)
                 .Except(existingInstructorIds)
                 .ToList();
 
             errors.AddRange(missingIds.Select(id =>
-                new ErrorResponse(35, $"El instructor con ID {id} no existe.")));
+                new ErrorResponse(
+                    35,
+                    $"El instructor con ID {id} no existe.")));
 
             return errors;
         }
-
     }
 }
