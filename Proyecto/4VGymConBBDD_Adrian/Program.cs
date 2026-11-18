@@ -1,6 +1,7 @@
 
 using _4VGymEF.Data;
 using _4VGymEF.Models;
+using _4VGymEF.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<GymDbContext>(options => options.UseSqlServer(connectionString));
-
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>

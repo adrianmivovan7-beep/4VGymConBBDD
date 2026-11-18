@@ -1,11 +1,8 @@
 @_4VGymEF_HostAddress = http://localhost:5117
 
-GET {{_4VGymEF_HostAddress}}/activity-types
-Accept: application/json
-
 ###
 
-GET {{_4VGymEF_HostAddress}}/instructors/2
+GET {{_4VGymEF_HostAddress}}/instructors
 Accept: application/json
 
 ###

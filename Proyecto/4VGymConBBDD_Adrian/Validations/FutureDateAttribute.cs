@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+    
 namespace _4VGymEF.Validations
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
